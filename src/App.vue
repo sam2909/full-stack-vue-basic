@@ -136,7 +136,7 @@ const handleAddCart = (id: number) => {
     ? cartItem.quantity++
     : carts.value.push({ ...product, quantity: 1 });
   cartNumber.value = handleCountCart(carts.value);
-  handleCalPrice();
+  // handleCalPrice();
   return carts;
 };
 const handleCalPrice = () => {
@@ -152,7 +152,7 @@ const handleCountCart = (obj) => {
 const handleRemoveItem = (id) => {
   carts.value = carts.value.filter((item) => item.id != id);
   cartNumber.value = handleCountCart(carts.value);
-  handleCalPrice();
+  // handleCalPrice();
 };
 const handleEditQuantity = (a, b) => {
   let cartItem = carts.value.find((item) => item.id === b);
