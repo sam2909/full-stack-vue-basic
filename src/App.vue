@@ -36,7 +36,11 @@
               class="w-full text-center mx-auto mt-2.5 p-2.5 bg-[#593d88] text-white cursor-pointer"
               @click="handleAddCart(product.id)"
             >
-              Add to cart
+              {{
+                clickItemIds[product.id] === product.id
+                  ? "Added"
+                  : "Add to cart"
+              }}
             </div>
           </div>
         </div>
@@ -74,7 +78,7 @@
             </div>
             <div class="col-span-5">
               <div>{{ item.name }}</div>
-              <div>{{ item.price }}</div>
+              <div>{{ handleEachItemPrice(item.id) }}</div>
             </div>
             <div class="text-center bg-[#593d88] my-auto">
               <div
@@ -123,11 +127,12 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import type { Cart, Product } from "./types/app.type";
 
 const isShow = ref(false);
-const carts = ref([]);
+const carts = ref<Cart[]>([]);
 const cartNumber = ref(0);
-const cartTotal = ref(0);
+const clickItemIds = ref<(number | null)[]>([]);
 const handleAddCart = (id: number) => {
   let product = products.find((item) => item.id === id);
   if (!product) return;
@@ -136,8 +141,14 @@ const handleAddCart = (id: number) => {
     ? cartItem.quantity++
     : carts.value.push({ ...product, quantity: 1 });
   cartNumber.value = handleCountCart(carts.value);
-  // handleCalPrice();
+  handleChangeAddCartButton(id);
   return carts;
+};
+const handleChangeAddCartButton = (id: number) => {
+  clickItemIds.value[id] = id;
+  setTimeout(() => {
+    clickItemIds.value[id] = null;
+  }, 3000);
 };
 const handleCalPrice = () => {
   let total = 0;
@@ -146,16 +157,27 @@ const handleCalPrice = () => {
   });
   return total;
 };
-const handleCountCart = (obj) => {
+
+const handleEachItemPrice = (id: number) => {
+  let cartItem = carts.value.find((item) => item.id === id);
+  if (!cartItem) return;
+  return renderNumber(cartItem.quantity * cartItem.price) + "đ";
+};
+const handleCountCart = (obj: { length: number }) => {
   return obj.length;
 };
-const handleRemoveItem = (id) => {
+const handleRemoveItem = (id: number) => {
   carts.value = carts.value.filter((item) => item.id != id);
   cartNumber.value = handleCountCart(carts.value);
-  // handleCalPrice();
 };
-const handleEditQuantity = (a, b) => {
-  let cartItem = carts.value.find((item) => item.id === b);
+
+//a: truyền vào chuỗi cộng hoặc trừ
+//b: truyền vào ID
+const handleEditQuantity = (a: string, b: number) => {
+  const cartItem = carts.value.find((item) => item.id === b);
+  if (!cartItem) {
+    return;
+  }
   if (a == "min") {
     if (cartItem.quantity === 1) {
       return (carts.value = carts.value.filter((item) => item.id != b));
@@ -177,7 +199,7 @@ const renderStars = (star: number) => {
   return s;
 };
 const unit = "đ";
-const products = [
+const products: Product[] = [
   {
     id: 1,
     name: "boAt Airdopes 131",
